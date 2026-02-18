@@ -6,13 +6,37 @@ services:
     container_name: diploma_db
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - diploma_network
 
+  backend:
+    build:
+      context: .  # путь к твоему бэкенду с Dockerfile
+    container_name: diploma_backend
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SECRETKEY: ${SECRETKEY}
+    ports:
+      - "5000:80" # маппинг порта контейнера на хост
+    depends_on:
+      - postgres
+    networks:
+      - diploma_network
+
+networks:
+  diploma_network:
+    driver: bridge
 volumes:
   postgres_data:
