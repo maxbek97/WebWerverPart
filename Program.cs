@@ -64,16 +64,23 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IvanvisionDbContext>();
 
-    try
+    var retries = 10;
+    while (retries > 0)
     {
-        db.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Migration error: " + ex.Message);
+        try
+        {
+            db.Database.Migrate();
+            Console.WriteLine("Migration successful");
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            Console.WriteLine("Migration failed: " + ex.Message);
+            Thread.Sleep(5000);
+        }
     }
 }
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -30,7 +30,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       SECRETKEY: ${SECRETKEY}
     ports:
-      - "5000:80"
+      - "5000:8080"
     command: [ "dotnet", "WebWerverPart.dll" ]
     networks:
       - diploma_network
