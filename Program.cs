@@ -15,7 +15,7 @@ var dockerConnectionString = Environment.GetEnvironmentVariable("DB_HOST") != nu
     ? $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
       $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
       $"Database={Environment.GetEnvironmentVariable("DB_DATABASE")};" +
-      $"User={Environment.GetEnvironmentVariable("DB_USER")};" +
+      $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
       $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"
     : null;
 

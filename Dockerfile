@@ -1,15 +1,12 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
-EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
-COPY ["WebWerverPart.csproj", "./"]
-RUN dotnet restore "./WebWerverPart.csproj"
 COPY . .
+RUN dotnet restore "WebWerverPart.csproj"
 RUN dotnet publish -c Release -o /app/publish
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 as final
 WORKDIR /app
+
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "WebWerverPart.dll"]
