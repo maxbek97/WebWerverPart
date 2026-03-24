@@ -2,6 +2,7 @@
 using WebWerverPart.Models;
 using WebWerverPart.Models.DTO;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace WebWerverPart.Services
 {
@@ -23,6 +24,9 @@ namespace WebWerverPart.Services
             if (await _db.Users.AnyAsync(u => u.UserLogin == dto.UserLogin))
                 return (false, "Login already exists");
 
+            if (await _db.Users.AnyAsync(u => u.UserEmail == dto.UserEmail))
+                return (false, "Email already exists");
+
             // создаём пользователя
             var user = new User
             {
@@ -34,8 +38,14 @@ namespace WebWerverPart.Services
             user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
             _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                return (false, "Database error during registration");
+            }
             return (true, "Registration successful");
         }
         public async Task<(bool Success, string AccessToken, string RefreshToken)> LoginAsync(LoginDTO dto)
@@ -64,8 +74,16 @@ namespace WebWerverPart.Services
                 IsRevoked = false
             };
 
-            _db.RefreshTokens.Add(refreshTokenEntity);
-            await _db.SaveChangesAsync();
+            try
+            {
+                _db.RefreshTokens.Add(refreshTokenEntity);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Логируем ex
+                return (false, "", "Database error during login");
+            }
 
             return (true, accessToken, refreshToken);
 
