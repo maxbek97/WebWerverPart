@@ -28,6 +28,26 @@ namespace WebWerverPart.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "bug_reports",
+                columns: table => new
+                {
+                    id_report = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
+                    report_description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("bug_reports_pkey", x => x.id_report);
+                    table.ForeignKey(
+                        name: "bug_reports_user_id_fkey",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id_user");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "refresh_tokens",
                 columns: table => new
                 {
@@ -49,6 +69,11 @@ namespace WebWerverPart.Migrations
                         principalColumn: "id_user",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_bug_reports_user_id",
+                table: "bug_reports",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_refresh_tokens_user_id",
@@ -77,6 +102,9 @@ namespace WebWerverPart.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "bug_reports");
+
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
 

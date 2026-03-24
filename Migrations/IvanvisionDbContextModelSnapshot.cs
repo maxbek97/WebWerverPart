@@ -22,6 +22,37 @@ namespace WebWerverPart.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("WebWerverPart.Models.BugReport", b =>
+                {
+                    b.Property<int>("IdReport")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_report");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdReport"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("ReportDescription")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("report_description");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("IdReport")
+                        .HasName("bug_reports_pkey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("bug_reports", (string)null);
+                });
+
             modelBuilder.Entity("WebWerverPart.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -57,7 +88,7 @@ namespace WebWerverPart.Migrations
                     b.HasKey("Id")
                         .HasName("refresh_tokens_pkey");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_refresh_tokens_user_id");
 
                     b.HasIndex(new[] { "Token" }, "refresh_tokens_token_key")
                         .IsUnique();
@@ -103,6 +134,17 @@ namespace WebWerverPart.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("WebWerverPart.Models.BugReport", b =>
+                {
+                    b.HasOne("WebWerverPart.Models.User", "User")
+                        .WithMany("BugReports")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("bug_reports_user_id_fkey");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WebWerverPart.Models.RefreshToken", b =>
                 {
                     b.HasOne("WebWerverPart.Models.User", "User")
@@ -117,6 +159,8 @@ namespace WebWerverPart.Migrations
 
             modelBuilder.Entity("WebWerverPart.Models.User", b =>
                 {
+                    b.Navigation("BugReports");
+
                     b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618

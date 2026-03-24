@@ -15,18 +15,42 @@ public partial class IvanvisionDbContext : DbContext
     {
     }
 
+    public virtual DbSet<BugReport> BugReports { get; set; }
+
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<BugReport>(entity =>
+        {
+            entity.HasKey(e => e.IdReport).HasName("bug_reports_pkey");
+
+            entity.ToTable("bug_reports");
+
+            entity.Property(e => e.IdReport).HasColumnName("id_report");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.ReportDescription)
+                .HasMaxLength(500)
+                .HasColumnName("report_description");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.BugReports)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("bug_reports_user_id_fkey");
+        });
+
         modelBuilder.Entity<RefreshToken>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("refresh_tokens_pkey");
 
             entity.ToTable("refresh_tokens");
+
+            entity.HasIndex(e => e.UserId, "IX_refresh_tokens_user_id");
 
             entity.HasIndex(e => e.Token, "refresh_tokens_token_key").IsUnique();
 

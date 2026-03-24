@@ -13,5 +13,7 @@ public partial class User
 
     public string UserEmail { get; set; } = null!;
 
+    public virtual ICollection<BugReport> BugReports { get; set; } = new List<BugReport>();
+
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }
