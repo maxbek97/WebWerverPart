@@ -25,14 +25,12 @@ public partial class IvanvisionDbContext : DbContext
     {
         modelBuilder.Entity<BugReport>(entity =>
         {
-            entity.HasKey(e => e.IdReport).HasName("bug_reports_pkey");
+            entity.HasKey(e => e.IdReport).HasName("bug_report_pkey");
 
-            entity.ToTable("bug_reports");
+            entity.ToTable("bug_report");
 
             entity.Property(e => e.IdReport).HasColumnName("id_report");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.ReportDescription)
                 .HasMaxLength(500)
                 .HasColumnName("report_description");
@@ -41,7 +39,7 @@ public partial class IvanvisionDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.BugReports)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("bug_reports_user_id_fkey");
+                .HasConstraintName("bug_report_user_id_fkey");
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>

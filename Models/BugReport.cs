@@ -11,7 +11,7 @@ public partial class BugReport
 
     public string ReportDescription { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; }
+    public DateOnly CreatedAt { get; set; }
 
     public virtual User User { get; set; } = null!;
 }

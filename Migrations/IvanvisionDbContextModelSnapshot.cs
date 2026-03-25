@@ -31,8 +31,8 @@ namespace WebWerverPart.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdReport"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date")
                         .HasColumnName("created_at");
 
                     b.Property<string>("ReportDescription")
@@ -46,11 +46,11 @@ namespace WebWerverPart.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("IdReport")
-                        .HasName("bug_reports_pkey");
+                        .HasName("bug_report_pkey");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("bug_reports", (string)null);
+                    b.ToTable("bug_report", (string)null);
                 });
 
             modelBuilder.Entity("WebWerverPart.Models.RefreshToken", b =>
@@ -140,7 +140,7 @@ namespace WebWerverPart.Migrations
                         .WithMany("BugReports")
                         .HasForeignKey("UserId")
                         .IsRequired()
-                        .HasConstraintName("bug_reports_user_id_fkey");
+                        .HasConstraintName("bug_report_user_id_fkey");
 
                     b.Navigation("User");
                 });

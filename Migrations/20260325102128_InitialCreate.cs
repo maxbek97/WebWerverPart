@@ -28,20 +28,20 @@ namespace WebWerverPart.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "bug_reports",
+                name: "bug_report",
                 columns: table => new
                 {
                     id_report = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     report_description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    created_at = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("bug_reports_pkey", x => x.id_report);
+                    table.PrimaryKey("bug_report_pkey", x => x.id_report);
                     table.ForeignKey(
-                        name: "bug_reports_user_id_fkey",
+                        name: "bug_report_user_id_fkey",
                         column: x => x.user_id,
                         principalTable: "users",
                         principalColumn: "id_user");
@@ -71,8 +71,8 @@ namespace WebWerverPart.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_bug_reports_user_id",
-                table: "bug_reports",
+                name: "IX_bug_report_user_id",
+                table: "bug_report",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
@@ -103,7 +103,7 @@ namespace WebWerverPart.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "bug_reports");
+                name: "bug_report");
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");

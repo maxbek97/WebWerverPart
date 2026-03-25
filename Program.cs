@@ -28,6 +28,7 @@ builder.Services.AddDbContext<IvanvisionDbContext>(options =>
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JWTService>();
+builder.Services.AddScoped<MainService>();
 
 builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("AuthSettings"));
 
