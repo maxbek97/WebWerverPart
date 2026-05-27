@@ -35,7 +35,6 @@ namespace WebWerverPart.Controllers
                 if (Emessage != "another server error")
                     return BadRequest(new { message = Emessage });
 
-                // 🔴 Если это серверная ошибка → 500
                 return StatusCode(500, new { message = Emessage });
             }
 

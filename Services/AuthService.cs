@@ -20,21 +20,19 @@ namespace WebWerverPart.Services
 
         public async Task<(bool Success, string Message)> RegisterAsync(RegisterDTO dto)
         {
-            // проверяем уникальность логина
             if (await _db.Users.AnyAsync(u => u.UserLogin == dto.UserLogin))
                 return (false, "Login already exists");
 
             if (await _db.Users.AnyAsync(u => u.UserEmail == dto.UserEmail))
                 return (false, "Email already exists");
 
-            // создаём пользователя
             var user = new User
             {
                 UserLogin = dto.UserLogin,
-                UserEmail = dto.UserEmail
+                UserEmail = dto.UserEmail,
+                UserRole = UserStatus.Standart
             };
 
-            // хешируем пароль
             user.PasswordHash = _hasher.HashPassword(user, dto.Password);
 
             _db.Users.Add(user);
@@ -42,7 +40,7 @@ namespace WebWerverPart.Services
             {
                 await _db.SaveChangesAsync();
             }
-            catch (DbUpdateException e)
+            catch (DbUpdateException)
             {
                 return (false, "Database error during registration");
             }
@@ -79,9 +77,8 @@ namespace WebWerverPart.Services
                 _db.RefreshTokens.Add(refreshTokenEntity);
                 await _db.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                // Логируем ex
                 return (false, "", "Database error during login");
             }
 

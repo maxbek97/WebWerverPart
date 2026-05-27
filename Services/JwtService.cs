@@ -21,7 +21,8 @@ namespace WebWerverPart.Services
             var claims = new List<Claim>
             {
                 new Claim("userLogin", user.UserLogin),
-                new Claim("userId", user.IdUser.ToString())
+                new Claim("userId", user.IdUser.ToString()),
+                new Claim("role", user.UserRole.ToString())
             };
             var jwtToken = new JwtSecurityToken(
                 expires: DateTime.UtcNow.Add(options.Value.Expires),
@@ -34,6 +35,7 @@ namespace WebWerverPart.Services
                 );
             return new JwtSecurityTokenHandler().WriteToken(jwtToken);
         }
+
         public string GenerateRefreshToken()
         {
             var randomBytes = new byte[64];
