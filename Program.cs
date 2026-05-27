@@ -11,20 +11,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// Если не локально
 var dockerConnectionString = Environment.GetEnvironmentVariable("DB_HOST") != null
-    ? $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+    ? $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
       $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
       $"Database={Environment.GetEnvironmentVariable("DB_DATABASE")};" +
       $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
       $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"
     : null;
 
-// 2) Если работаем локально → берем строку подключения из appsettings
+// 2) Если локально
 var connectionString = dockerConnectionString
                        ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<IvanvisionDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(
+        connectionString,
+        o => o.MapEnum<UserStatus>("user_status")
+        ));
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JWTService>();

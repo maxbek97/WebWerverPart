@@ -21,13 +21,18 @@ public partial class IvanvisionDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum("user_status", new[] { "admin", "standart" });
+
         modelBuilder.Entity<BugReport>(entity =>
         {
             entity.HasKey(e => e.IdReport).HasName("bug_report_pkey");
 
             entity.ToTable("bug_report");
+
+            entity.HasIndex(e => e.UserId, "IX_bug_report_user_id");
 
             entity.Property(e => e.IdReport).HasColumnName("id_report");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");

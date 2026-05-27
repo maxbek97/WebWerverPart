@@ -12,7 +12,7 @@ using WebWerverPart.Models;
 namespace WebWerverPart.Migrations
 {
     [DbContext(typeof(IvanvisionDbContext))]
-    [Migration("20260325102128_InitialCreate")]
+    [Migration("20260527130743_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -23,6 +23,7 @@ namespace WebWerverPart.Migrations
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "user_status", new[] { "admin", "standart" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("WebWerverPart.Models.BugReport", b =>
@@ -51,7 +52,7 @@ namespace WebWerverPart.Migrations
                     b.HasKey("IdReport")
                         .HasName("bug_report_pkey");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_bug_report_user_id");
 
                     b.ToTable("bug_report", (string)null);
                 });
@@ -124,6 +125,10 @@ namespace WebWerverPart.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("user_login");
+
+                    b.Property<UserStatus>("UserRole")
+                        .HasColumnType("user_status")
+                        .HasColumnName("user_role");
 
                     b.HasKey("IdUser")
                         .HasName("users_pkey");

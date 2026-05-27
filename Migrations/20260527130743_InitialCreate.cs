@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using WebWerverPart.Models;
 
 #nullable disable
 
@@ -12,6 +13,9 @@ namespace WebWerverPart.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:user_status", "admin,standart");
+
             migrationBuilder.CreateTable(
                 name: "users",
                 columns: table => new
@@ -20,7 +24,8 @@ namespace WebWerverPart.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_login = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     password_hash = table.Column<string>(type: "text", nullable: false),
-                    user_email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    user_email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    user_role = table.Column<UserStatus>(type: "user_status", nullable: false, defaultValue: UserStatus.Standart)
                 },
                 constraints: table =>
                 {
