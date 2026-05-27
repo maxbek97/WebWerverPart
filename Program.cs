@@ -1,23 +1,114 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using WebWerverPart.Models;
+using WebWerverPart.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// Если не локально
+var dockerConnectionString = Environment.GetEnvironmentVariable("DB_HOST") != null
+    ? $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
+      $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+      $"Database={Environment.GetEnvironmentVariable("DB_DATABASE")};" +
+      $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
+      $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};"
+    : null;
+
+// 2) Если локально
+var connectionString = dockerConnectionString
+                       ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<IvanvisionDbContext>(options =>
+    options.UseNpgsql(
+        connectionString,
+        o => o.MapEnum<UserStatus>("user_status")
+        ));
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<JWTService>();
+builder.Services.AddScoped<MainService>();
+
+builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("AuthSettings"));
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
+var secretKey = Environment.GetEnvironmentVariable("SECRETKEY")
+                ?? builder.Configuration["AuthSettings:SecretKey"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(secretKey!))
+    };
+});
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Авто-миграции
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
+    var db = scope.ServiceProvider.GetRequiredService<IvanvisionDbContext>();
+
+    var retries = 10;
+    while (retries > 0)
+    {
+        try
+        {
+            db.Database.Migrate();
+            Console.WriteLine("Migration successful");
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            Console.WriteLine("Migration failed: " + ex.Message);
+            Thread.Sleep(5000);
+        }
+    }
 }
 
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseCors("AllowReactApp");
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

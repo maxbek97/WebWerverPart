@@ -1,18 +1,54 @@
-﻿version: '3.9'
-
+﻿
 services:
   postgres:
     image: postgres:16
     container_name: diploma_db
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - diploma_network
+
+  backend:
+    build: .
+    container_name: diploma_backend
+    depends_on:
+       - postgres
+
+    restart: always
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SECRETKEY: ${SECRETKEY}
+    ports:
+      - "5000:8080"
+    command: [ "dotnet", "WebWerverPart.dll" ]
+    networks:
+      - diploma_network
+
+  frontend:
+    build: 
+      context: ../webpart
+    container_name: diploma_frontend
+    restart: always
+    networks:
+      - diploma_network
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+networks:
+  diploma_network:
 
 volumes:
   postgres_data:
